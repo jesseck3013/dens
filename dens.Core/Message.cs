@@ -1,19 +1,19 @@
 ﻿namespace dens.Core;
 
-public enum MessageType
+public enum MessageType : ushort
 {
     Query = 0,
     Response = 1,
 }
 
-public enum QueryType
+public enum QueryType : ushort
 {
     Query = 0,
     IQuery = 1,
     Status = 2,
 }
 
-public enum ResponseType
+public enum ResponseType : ushort
 {
     Ok = 0,
     FormatError = 1,
@@ -21,6 +21,7 @@ public enum ResponseType
     NameError = 3,
     NotImplemented = 4,
     Refused = 5,
+    IsQuery = 6,
 }
 
 public class Header
@@ -37,6 +38,57 @@ public class Header
     public ushort ANCOUNT { get; set; }
     public ushort NSCOUNT { get; set; }
     public ushort ARCOUNT { get; set; }
+
+    public static Header NewQuery()
+    {
+	return new Header
+        {
+            ID = 0x01, // TODO: generate random ID
+            QR = MessageType.Query,
+            OPCODE = QueryType.Query,
+            AA = false,
+            TC = false,
+            RD = true,
+            RA = false,
+            RCODE = ResponseType.IsQuery,
+            QDCOUNT = 0x01,
+            ANCOUNT = 0x00,
+            NSCOUNT = 0x00,
+            ARCOUNT = 0x00
+        };
+    }
+
+    public byte[] Encode()
+    {
+	ushort[] data = new ushort[6];
+	
+	data[0] = ID;
+	ushort flags = 0;
+	flags |= (ushort)((ushort)QR << 15);
+	flags |= (ushort)((ushort)OPCODE << 11);
+	flags |= (ushort)((ushort)(AA ? 1 : 0) << 10);
+	flags |= (ushort)((ushort)(TC ? 1 : 0) << 9);
+	flags |= (ushort)((ushort)(RD ? 1 : 0) << 8);
+	flags |= (ushort)((ushort)(RA ? 1 : 0) << 7);
+	flags |= (ushort)(0) << 6; // the Z bit
+	flags |= (ushort)((ushort)(RCODE == ResponseType.IsQuery ? 0 : RCODE) << 3);
+	
+	data[1] = flags;
+	data[2] = QDCOUNT;
+	data[3] = ANCOUNT;
+	data[4] = NSCOUNT;
+	data[5] = ARCOUNT;
+
+	Byte[] result = new Byte[12];
+
+	foreach (var item in data)
+	{
+	    var itemByte = BitConverter.GetBytes(item);
+	    result = result.Concat(itemByte).ToArray();
+	}
+
+	return result;
+    }
 }
 
 public enum RRType : ushort
@@ -105,6 +157,14 @@ public class Question
 {
     public string QNAME { get; set; }
     public QType QTYPE { get; set; }
+    public QClass QCLASS { get; set; }
+
+    public Question(string name, QType qtype = QType.A, QClass qclass = QClass.IN)
+    {
+	QNAME = name;
+	QTYPE = qtype;
+	QCLASS = qclass;
+    }
 }
 
 public class RR
@@ -121,12 +181,23 @@ public class Message
 {
     public Header header { get; set; }
     public Question question { get; set; }
-    public RR[] Answer { get; set; }
-    public RR[] Authority { get; set; }
-    public RR[] Additional { get; set; }
+    public RR[] Answer { get; set; } = [];
+    public RR[] Authority { get; set; } = [];
+    public RR[] Additional { get; set; } = [];
 
-    public Message()
+    // create a query message
+    public Message(string name, MessageType messageType =  MessageType.Query)
     {
-	
+	if (messageType == MessageType.Response)
+	{
+	    // TODO: implement later
+	}
+
+	Header header = Header.NewQuery();
+	Question question = new Question(name);
     }
+
+    // public Encode() {
+	
+    // }
 }
