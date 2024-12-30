@@ -80,6 +80,7 @@ public class Header
 	data[5] = ARCOUNT;
 
 	Byte[] result = new Byte[12];
+
 	for (int i = 0; i < data.Length; i++)
 	{
 	    byte[] bytes = BitConverter.GetBytes(data[i]);
