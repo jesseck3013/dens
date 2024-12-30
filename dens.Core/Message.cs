@@ -205,8 +205,8 @@ public class Message
 	    // TODO: implement later
 	}
 
-	Header header = Header.NewQuery();
-	Question question = new Question(name);
+	header = Header.NewQuery();
+	question = new Question(name);
     }
 
     public static Byte[] EncodeName(string name)
@@ -235,9 +235,27 @@ public class Message
 	return NameByte.ToArray();
     }
 
-    // public Encode() {
-	
-	
+    public Byte[] Encode() {
+	Byte[] headerByte = header.Encode();
+	Byte[] nameByte = EncodeName(question.QNAME);
+	Byte[] qType = BitConverter.GetBytes((ushort)question.QTYPE);
+	Byte[] qClass = BitConverter.GetBytes((ushort)question.QCLASS);
 
-    // }
+	int length = headerByte.Length + nameByte.Length + qType.Length + qClass.Length;
+        byte[] result = new byte[length];
+
+        int offset = 0;
+        Array.Copy(headerByte, 0, result, offset, headerByte.Length);
+        offset += headerByte.Length;
+
+        Array.Copy(nameByte, 0, result, offset, nameByte.Length);
+        offset += nameByte.Length;
+
+        Array.Copy(qType, 0, result, offset, qType.Length);
+        offset += qType.Length;
+
+        Array.Copy(qClass, 0, result, offset, qClass.Length);
+
+	return result;
+    }
 }

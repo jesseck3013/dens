@@ -10,9 +10,11 @@ enum Type : int
 
 class Program
 {
-    static async Task Main()
+    static void Main()
     {
-	var byteArray = Message.EncodeName("example.com");
+	var msg = new Message("example.com");
+
+        var byteArray = msg.Encode();
 	string hexString = BitConverter.ToString(byteArray);
 	Console.WriteLine(hexString);
 
