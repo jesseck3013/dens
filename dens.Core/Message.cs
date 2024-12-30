@@ -1,5 +1,7 @@
 ﻿namespace dens.Core;
 
+using System.Text;
+
 public enum MessageType : ushort
 {
     Query = 0,
@@ -207,7 +209,35 @@ public class Message
 	Question question = new Question(name);
     }
 
+    public static Byte[] EncodeName(string name)
+    {
+	// TODO: Check if name is a valid domain name
+	var utf8 = new UTF8Encoding();
+	string[] labels = name.Split(".");
+	List<byte> NameByte = new List<byte>{};
+
+	foreach (var label in labels)
+	{
+	    int length = utf8.GetBytes(label).Length;
+	    Byte[] data = BitConverter.GetBytes(length);
+	    NameByte.Add(data[0]);
+	    foreach (byte b in label)
+	    {
+		NameByte.Add(b);
+	    }
+	    if (label.Length % 2 == 0)
+	    {
+		NameByte.Add(0);
+	    }
+	}
+	NameByte.Add(0);
+
+	return NameByte.ToArray();
+    }
+
     // public Encode() {
 	
+	
+
     // }
 }

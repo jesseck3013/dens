@@ -12,12 +12,16 @@ class Program
 {
     static async Task Main()
     {
-	Header header = Header.NewQuery();
+	var byteArray = Message.EncodeName("example.com");
+	string hexString = BitConverter.ToString(byteArray);
+	Console.WriteLine(hexString);
+
+	// Header header = Header.NewQuery();
 	
-	foreach (var item in header.Encode())
-	{
-	    Console.WriteLine(Convert.ToString(item, 2).PadLeft(8, '0'));
-	}
+	// foreach (var item in header.Encode())
+	// {
+	//     Console.WriteLine(Convert.ToString(item, 2).PadLeft(8, '0'));
+	// }
 	
 	// UdpClient udpClient = new UdpClient();
 	
