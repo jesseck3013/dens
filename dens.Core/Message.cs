@@ -64,8 +64,8 @@ public class Header
 	
 	data[0] = ID;
 	ushort flags = 0;
-	flags |= (ushort)((ushort)QR << 15);
-	flags |= (ushort)((ushort)OPCODE << 11);
+	flags |= (ushort)((ushort)(QR) << 15);
+	flags |= (ushort)((ushort)(OPCODE) << 11);
 	flags |= (ushort)((ushort)(AA ? 1 : 0) << 10);
 	flags |= (ushort)((ushort)(TC ? 1 : 0) << 9);
 	flags |= (ushort)((ushort)(RD ? 1 : 0) << 8);
@@ -80,11 +80,20 @@ public class Header
 	data[5] = ARCOUNT;
 
 	Byte[] result = new Byte[12];
-
-	foreach (var item in data)
+	for (int i = 0; i < data.Length; i++)
 	{
-	    var itemByte = BitConverter.GetBytes(item);
-	    result = result.Concat(itemByte).ToArray();
+	    byte[] bytes = BitConverter.GetBytes(data[i]);
+	    
+	    if(BitConverter.IsLittleEndian)
+	    {
+		result[i * 2] = bytes[1];
+		result[i * 2 + 1] = bytes[0];
+	    }
+	    else
+	    {
+		result[i * 2] = bytes[0];
+		result[i * 2 + 1] = bytes[1];	
+	    }
 	}
 
 	return result;
