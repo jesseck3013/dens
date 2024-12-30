@@ -3,16 +3,20 @@ using System.Text;
 using System.Net.Sockets;
 using dens.Core;
 
+enum Type : int
+{
+    x = 1,
+}
+
 class Program
 {
     static async Task Main()
     {
-
 	Header header = Header.NewQuery();
 	
 	foreach (var item in header.Encode())
 	{
-	    Console.WriteLine(item);
+	    Console.WriteLine(Convert.ToString(item, 2).PadLeft(8, '0'));
 	}
 	
 	// UdpClient udpClient = new UdpClient();
