@@ -83,12 +83,12 @@ public class Header
 	ushort ARCOUNT = headerUShort[5];
 
 	var QR = (secondLineFlags >> 15) & 1;
-	var OPCODE = (secondLineFlags >> 11) & (1 << 4 - 1);
+	var OPCODE = (secondLineFlags >> 11) & ((1 << 4) - 1);
 	var AA = (secondLineFlags >> 10) & 1;
 	var TC = (secondLineFlags >> 9) & 1;
 	var RD = (secondLineFlags >> 8) & 1;
 	var RA = (secondLineFlags >> 7) & 1;
-	var RCODE = (secondLineFlags >> 3) & (1 << 4 - 1);
+	var RCODE = (secondLineFlags >> 3) & ((1 << 4) - 1);
 
 	return new Header
         {
@@ -255,6 +255,44 @@ public class Message
 	header = Header.NewQuery();
 	question = new Question(name);
     }
+
+    public enum ParseState
+    {
+	Length,
+	Label,
+	Pointer,
+	Root,
+    }
+
+    // public static string DecodeName(Byte[] nameByte)
+    // {
+    // 	var state = ParseState.Length;
+    // 	byte length = 0;
+    // 	int pointer = 0;
+
+    // 	while (true)
+    // 	{
+    // 	    if (state == ParseState.Length)
+    // 	    {
+    // 		byte lengthD = nameByte[pointer];
+
+    // 		// pointer check
+    // 		    lengthD >> 6 = 0x11;
+    // 	    }
+    // 	    else if (state == ParseState.Label)
+    // 	    {
+		
+    // 	    }
+    // 	    else if (state == ParseState.Pointer)
+    // 	    {
+		
+    // 	    }
+    // 	    else {
+    // 		break;
+    // 	    }
+    // 	}
+    // 	return "";
+    // }
 
     public static Byte[] EncodeName(string name)
     {
