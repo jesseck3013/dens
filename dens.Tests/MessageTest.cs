@@ -48,4 +48,11 @@ public class HeaderTest
 	Assert.Equal(0, actual.NSCOUNT);
 	Assert.Equal(0, actual.ARCOUNT);
     }
+
+    [Fact]
+    public void PointerTest1()
+    {
+	Assert.True(Message.IsPointer(0b_1100_0000));
+	Assert.False(Message.IsPointer(0b_0000_0000));
+    }
 }

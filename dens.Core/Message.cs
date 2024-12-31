@@ -264,35 +264,54 @@ public class Message
 	Root,
     }
 
-    // public static string DecodeName(Byte[] nameByte)
-    // {
-    // 	var state = ParseState.Length;
-    // 	byte length = 0;
-    // 	int pointer = 0;
+    public static bool IsPointer(byte data)
+    {
 
-    // 	while (true)
-    // 	{
-    // 	    if (state == ParseState.Length)
-    // 	    {
-    // 		byte lengthD = nameByte[pointer];
+	return (data >> 6) == 0b_0000_0011;
+    }
 
-    // 		// pointer check
-    // 		    lengthD >> 6 = 0x11;
-    // 	    }
-    // 	    else if (state == ParseState.Label)
-    // 	    {
+    public static string DecodeName(Byte[] nameByte)
+    {
+	var domainName = new List<byte>();
+	var state = ParseState.Length;
+	byte length = 0;
+	int pointer = 0;
+
+	while (true)
+	{
+	    if (state == ParseState.Length)
+	    {
+		length = nameByte[pointer];
+
+		if (IsPointer(length))
+		{
+		    state = ParseState.Pointer;
+		} else
+		{
+		    state = ParseState.Label;
+		    pointer++;
+		}
+	    }
+	    else if (state == ParseState.Label)
+	    {
+		byte character = nameByte[pointer];
+		domainName.Add(character);
+		pointer++;
+		length--;
+		if (length == 0) {
+		    state = PraseState.Length;
+		}
+	    }
+	    else if (state == ParseState.Pointer)
+	    {
 		
-    // 	    }
-    // 	    else if (state == ParseState.Pointer)
-    // 	    {
-		
-    // 	    }
-    // 	    else {
-    // 		break;
-    // 	    }
-    // 	}
-    // 	return "";
-    // }
+	    }
+	    else {
+		break;
+	    }
+	}
+	return "";
+    }
 
     public static Byte[] EncodeName(string name)
     {
