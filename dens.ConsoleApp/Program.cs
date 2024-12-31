@@ -14,9 +14,43 @@ class Program
     {
 	var msg = new Message("example.com");
 
-        var byteArray = msg.Encode();
-	string hexString = BitConverter.ToString(byteArray);
-	Console.WriteLine(hexString);
+        var byteArray = msg.header.Encode();
+
+	var header = Header.Decode(byteArray);
+	Console.WriteLine(header.ID);
+	Console.WriteLine(header.QR);
+	Console.WriteLine(header.OPCODE);
+	Console.WriteLine(header.AA);
+	Console.WriteLine(header.TC);
+	Console.WriteLine(header.RD);
+	Console.WriteLine(header.RA);
+	Console.WriteLine(header.RCODE);
+	Console.WriteLine(header.QDCOUNT);
+	//string hexString = BitConverter.ToString(byteArray);
+	//Console.WriteLine(hexString);
+
+	var secondLineByte = new Byte[2] {byteArray[3], byteArray[2]} ;
+
+	ushort secondLine = BitConverter.ToUInt16(secondLineByte, 0);
+
+	var QR = (secondLine >> 15) & 1;
+	var OPCODE = (secondLine >> 11) & (1 << 4 - 1);
+	var AA = (secondLine >> 10) & 1;
+	var TC = (secondLine >> 9) & 1;
+	var RD = (secondLine >> 8) & 1;
+	var RA = (secondLine >> 7) & 1;
+	var RCODE = (secondLine >> 3) & (1 << 4 - 1);
+
+	Console.WriteLine(QR);
+	Console.WriteLine(OPCODE);
+	Console.WriteLine(AA);
+	Console.WriteLine(TC);
+	Console.WriteLine(RD);
+	Console.WriteLine(RA);
+	Console.WriteLine(RCODE);
+
+	// question header in bytes:
+	//     00-01-01-00-00-01-00-00-00-00-00-00
 
 	// Header header = Header.NewQuery();
 	

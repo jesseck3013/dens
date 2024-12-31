@@ -60,6 +60,48 @@ public class Header
         };
     }
 
+    public static Header Decode(byte[] header)
+    {
+	ushort[] headerUShort = new ushort[6];
+	for (var i = 0; i < header.Length - 2; i += 2)
+	{
+	    Console.WriteLine(i);
+	    headerUShort[i / 2] = header[i];
+	    headerUShort[i / 2 + 1] = header[i + 1];
+	}
+	
+	ushort ID = headerUShort[0];
+	ushort secondLineFlags = headerUShort[1];
+	ushort QDCOUNT = headerUShort[2];
+	ushort ANCOUNT = headerUShort[3];
+	ushort NSCOUNT = headerUShort[4];
+	ushort ARCOUNT = headerUShort[5];
+
+	var QR = (secondLineFlags >> 15) & 1;
+	var OPCODE = (secondLineFlags >> 11) & (1 << 4 - 1);
+	var AA = (secondLineFlags >> 10) & 1;
+	var TC = (secondLineFlags >> 9) & 1;
+	var RD = (secondLineFlags >> 8) & 1;
+	var RA = (secondLineFlags >> 7) & 1;
+	var RCODE = (secondLineFlags >> 3) & (1 << 4 - 1);
+
+	return new Header
+        {
+            ID = ID,
+            QR = (MessageType)QR,
+            OPCODE = (QueryType)OPCODE,
+            AA = AA == 1,
+            TC = TC == 1,
+            RD = RD == 1,
+            RA = RA == 1,
+            RCODE = QR == 0 ? ResponseType.IsQuery : (ResponseType)RCODE,
+            QDCOUNT = QDCOUNT,
+            ANCOUNT = ANCOUNT,
+            NSCOUNT = NSCOUNT,
+            ARCOUNT = ARCOUNT
+        };
+    }
+
     public byte[] Encode()
     {
 	ushort[] data = new ushort[6];
