@@ -65,9 +65,14 @@ public class Header
 	ushort[] headerUShort = new ushort[6];
 	for (var i = 0; i < header.Length - 2; i += 2)
 	{
-	    Console.WriteLine(i);
-	    headerUShort[i / 2] = header[i];
-	    headerUShort[i / 2 + 1] = header[i + 1];
+	    if(BitConverter.IsLittleEndian)
+	    {
+		headerUShort[i / 2] = BitConverter.ToUInt16(new Byte[2]{header[i + 1], header[i]}, 0);
+	    } else
+	    {
+		headerUShort[i / 2] = BitConverter.ToUInt16(new Byte[2]{header[i], header[i + 1]}, 0);		
+	    }
+
 	}
 	
 	ushort ID = headerUShort[0];

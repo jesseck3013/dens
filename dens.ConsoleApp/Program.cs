@@ -12,11 +12,10 @@ class Program
 {
     static void Main()
     {
-	var msg = new Message("example.com");
+	Byte[] headerByte = new Byte[12] { 0xAA, 0xAA, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 };
+	
+	var header = Header.Decode(headerByte);
 
-        var byteArray = msg.header.Encode();
-
-	var header = Header.Decode(byteArray);
 	Console.WriteLine(header.ID);
 	Console.WriteLine(header.QR);
 	Console.WriteLine(header.OPCODE);
@@ -25,29 +24,47 @@ class Program
 	Console.WriteLine(header.RD);
 	Console.WriteLine(header.RA);
 	Console.WriteLine(header.RCODE);
+	Console.WriteLine(header.ANCOUNT);
 	Console.WriteLine(header.QDCOUNT);
+	Console.WriteLine(header.NSCOUNT);
+	Console.WriteLine(header.ARCOUNT);
+
+	// var msg = new Message("example.com");
+
+        // var byteArray = msg.header.Encode();
+
+	// var header = Header.Decode(byteArray);
+	// Console.WriteLine(header.ID);
+	// Console.WriteLine(header.QR);
+	// Console.WriteLine(header.OPCODE);
+	// Console.WriteLine(header.AA);
+	// Console.WriteLine(header.TC);
+	// Console.WriteLine(header.RD);
+	// Console.WriteLine(header.RA);
+	// Console.WriteLine(header.RCODE);
+	
 	//string hexString = BitConverter.ToString(byteArray);
 	//Console.WriteLine(hexString);
 
-	var secondLineByte = new Byte[2] {byteArray[3], byteArray[2]} ;
+	// var secondLineByte = new Byte[2] {byteArray[3], byteArray[2]} ;
 
-	ushort secondLine = BitConverter.ToUInt16(secondLineByte, 0);
+	// ushort secondLine = BitConverter.ToUInt16(secondLineByte, 0);
 
-	var QR = (secondLine >> 15) & 1;
-	var OPCODE = (secondLine >> 11) & (1 << 4 - 1);
-	var AA = (secondLine >> 10) & 1;
-	var TC = (secondLine >> 9) & 1;
-	var RD = (secondLine >> 8) & 1;
-	var RA = (secondLine >> 7) & 1;
-	var RCODE = (secondLine >> 3) & (1 << 4 - 1);
+	// var QR = (secondLine >> 15) & 1;
+	// var OPCODE = (secondLine >> 11) & (1 << 4 - 1);
+	// var AA = (secondLine >> 10) & 1;
+	// var TC = (secondLine >> 9) & 1;
+	// var RD = (secondLine >> 8) & 1;
+	// var RA = (secondLine >> 7) & 1;
+	// var RCODE = (secondLine >> 3) & (1 << 4 - 1);
 
-	Console.WriteLine(QR);
-	Console.WriteLine(OPCODE);
-	Console.WriteLine(AA);
-	Console.WriteLine(TC);
-	Console.WriteLine(RD);
-	Console.WriteLine(RA);
-	Console.WriteLine(RCODE);
+	// Console.WriteLine(QR);
+	// Console.WriteLine(OPCODE);
+	// Console.WriteLine(AA);
+	// Console.WriteLine(TC);
+	// Console.WriteLine(RD);
+	// Console.WriteLine(RA);
+	// Console.WriteLine(RCODE);
 
 	// question header in bytes:
 	//     00-01-01-00-00-01-00-00-00-00-00-00
