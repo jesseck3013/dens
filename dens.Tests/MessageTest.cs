@@ -76,4 +76,13 @@ public class HeaderTest
 	Assert.Equal("ISI", actual);
 	Assert.Equal(6, pointer);
     }
+
+    [Fact]
+    public void DecodeNameTest1()
+    {
+	var (actual, pointer) = Message.DecodeName(domainByte, 0);
+
+	Assert.Equal(domain, actual);
+	Assert.Equal(domainByte.Length, pointer);
+    }
 }

@@ -256,24 +256,17 @@ public class Message
 	question = new Question(name);
     }
 
-    public enum ParseState
-    {
-	Length,
-	Label,
-	Pointer,
-	Root,
-    }
-
     public static bool IsPointer(byte data)
     {
 
 	return (data >> 6) == 0b_0000_0011;
     }
 
-    public static (string, int) ParseLabel(Byte[] nameByte, int Pointer)
+    public static (string, int) ParseLabel(Byte[] nameByte, int pointer)
     {
-	byte length = nameByte[Pointer];
-	int firstCharIndex = Pointer + 1;
+	byte length = nameByte[pointer];
+	
+	int firstCharIndex = pointer + 1;
 	string label = "";
 
 	for (var i = firstCharIndex; i < firstCharIndex + length; i++)
@@ -285,30 +278,77 @@ public class Message
 	return (label, firstCharIndex + length);
     }
 
-    public static (string, int) DecodeName(Byte[] nameByte)
+    public static string ParsePointer(Byte[] message, int Pointer)
     {
-	var domainName = new List<byte>();
-	var state = ParseState.Length;
-	byte length = 0;
-	int pointer = 0;
+	var pointerValue = new Byte[2]{message[Pointer], message[Pointer + 1]};
+	var bitMask = (1 << 14) - 1;
+	var pointTo = BitConverter.ToUInt16(pointerValue) & bitMask;
+	
+	var (name, pointer) = DecodeName(message, pointTo);
+
+	return name;
+    }
+
+    public enum ParseState
+    {
+	// Check state is to confirm
+	// if next action is to parse a label or a pointer.
+	Check, 
+	Label,
+	Pointer,
+	Root,
+    }
+
+    public static (string, int) DecodeName(Byte[] message, int pointer)
+    {
+	var state = ParseState.Check;
+	string name = "";
 
 	while (true)
 	{
-	    if (state == ParseState.Length)
+	    if (state == ParseState.Check)
 	    {
+		var length = message[pointer];
+
+		// root
+		if (length == 0)
+		{
+		    // remove trailing dot
+		    name = name.Substring(0, name.Length - 1);
+		    pointer++;
+		    break;
+		}
+
+		if (IsPointer(length))
+		{
+		    state = ParseState.Pointer;
+		}
+		else
+		{
+		    state = ParseState.Label;
+		}
 	    }
 	    else if (state == ParseState.Label)
 	    {
+		var (label, nextPointer) = ParseLabel(message, pointer);
+		name = string.Concat(name, label);
+		name = string.Concat(name, ".");
+		pointer = nextPointer;
+		state = ParseState.Check;
 	    }
 	    else if (state == ParseState.Pointer)
 	    {
+		var label = ParsePointer(message, pointer);
+		name = string.Concat(name, label);
+		pointer += 2;
+		break;
 	    }
 	    else {
 		break;
 	    }
-		break;
 	}
-	return ("", 0);
+
+	return (name, pointer);
     }
 
     public static Byte[] EncodeName(string name)
