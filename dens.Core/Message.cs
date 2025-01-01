@@ -270,48 +270,48 @@ public class Message
 	return (data >> 6) == 0b_0000_0011;
     }
 
-    public static string DecodeName(Byte[] nameByte)
-    {
-	var domainName = new List<byte>();
-	var state = ParseState.Length;
-	byte length = 0;
-	int pointer = 0;
+    // public static string DecodeName(Byte[] nameByte)
+    // {
+    // 	var domainName = new List<byte>();
+    // 	var state = ParseState.Length;
+    // 	byte length = 0;
+    // 	int pointer = 0;
 
-	while (true)
-	{
-	    if (state == ParseState.Length)
-	    {
-		length = nameByte[pointer];
+    // 	while (true)
+    // 	{
+    // 	    if (state == ParseState.Length)
+    // 	    {
+    // 		length = nameByte[pointer];
 
-		if (IsPointer(length))
-		{
-		    state = ParseState.Pointer;
-		} else
-		{
-		    state = ParseState.Label;
-		    pointer++;
-		}
-	    }
-	    else if (state == ParseState.Label)
-	    {
-		byte character = nameByte[pointer];
-		domainName.Add(character);
-		pointer++;
-		length--;
-		if (length == 0) {
-		    state = PraseState.Length;
-		}
-	    }
-	    else if (state == ParseState.Pointer)
-	    {
+    // 		if (IsPointer(length))
+    // 		{
+    // 		    state = ParseState.Pointer;
+    // 		} else
+    // 		{
+    // 		    state = ParseState.Label;
+    // 		    pointer++;
+    // 		}
+    // 	    }
+    // 	    else if (state == ParseState.Label)
+    // 	    {
+    // 		byte character = nameByte[pointer];
+    // 		domainName.Add(character);
+    // 		pointer++;
+    // 		length--;
+    // 		if (length == 0) {
+    // 		    state = PraseState.Length;
+    // 		}
+    // 	    }
+    // 	    else if (state == ParseState.Pointer)
+    // 	    {
 		
-	    }
-	    else {
-		break;
-	    }
-	}
-	return "";
-    }
+    // 	    }
+    // 	    else {
+    // 		break;
+    // 	    }
+    // 	}
+    // 	return "";
+    // }
 
     public static Byte[] EncodeName(string name)
     {
@@ -329,10 +329,10 @@ public class Message
 	    {
 		NameByte.Add(b);
 	    }
-	    if (label.Length % 2 == 0)
-	    {
-		NameByte.Add(0);
-	    }
+	    // if (label.Length % 2 == 0)
+	    // {
+	    // 	NameByte.Add(0);
+	    // }
 	}
 	NameByte.Add(0);
 
