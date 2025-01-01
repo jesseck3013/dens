@@ -270,7 +270,22 @@ public class Message
 	return (data >> 6) == 0b_0000_0011;
     }
 
-    public static string DecodeName(Byte[] nameByte)
+    public static (string, int) ParseLabel(Byte[] nameByte, int Pointer)
+    {
+	byte length = nameByte[Pointer];
+	int firstCharIndex = Pointer + 1;
+	string label = "";
+
+	for (var i = firstCharIndex; i < firstCharIndex + length; i++)
+	{
+	    char letter = (char)nameByte[i];
+	    label = string.Concat(label, letter.ToString());
+	}
+
+	return (label, firstCharIndex + length);
+    }
+
+    public static (string, int) DecodeName(Byte[] nameByte)
     {
 	var domainName = new List<byte>();
 	var state = ParseState.Length;
@@ -281,36 +296,19 @@ public class Message
 	{
 	    if (state == ParseState.Length)
 	    {
-		length = nameByte[pointer];
-
-		if (IsPointer(length))
-		{
-		    state = ParseState.Pointer;
-		} else
-		{
-		    state = ParseState.Label;
-		    pointer++;
-		}
 	    }
 	    else if (state == ParseState.Label)
 	    {
-		byte character = nameByte[pointer];
-		domainName.Add(character);
-		pointer++;
-		length--;
-		if (length == 0) {
-		    state = PraseState.Length;
-		}
 	    }
 	    else if (state == ParseState.Pointer)
 	    {
-		
 	    }
 	    else {
 		break;
 	    }
+		break;
 	}
-	return "";
+	return ("", 0);
     }
 
     public static Byte[] EncodeName(string name)

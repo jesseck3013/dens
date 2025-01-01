@@ -55,4 +55,25 @@ public class HeaderTest
 	Assert.True(Message.IsPointer(0b_1100_0000));
 	Assert.False(Message.IsPointer(0b_0000_0000));
     }
+
+    public string domain = "F.ISI.ARPA";
+    public byte[] domainByte = new Byte[] {0x01, 0x46, 0x03, 0x49, 0x53, 0x49, 0x04, 0x41, 0x52, 0x50, 0x41, 0x00};
+
+    [Fact]
+    public void ParseLabelTest1()
+    {
+	var (actual, pointer) = Message.ParseLabel(domainByte, 0);
+
+	Assert.Equal("F", actual);
+	Assert.Equal(2, pointer);
+    }
+
+    [Fact]
+    public void ParseLabelTest2()
+    {
+	var (actual, pointer) = Message.ParseLabel(domainByte, 2);
+
+	Assert.Equal("ISI", actual);
+	Assert.Equal(6, pointer);
+    }
 }
