@@ -5,7 +5,7 @@ using dens.Core;
 public class HeaderTest
 {
     [Fact]
-    public void EncodeTest1()
+    public void HeaderEncodeTest1()
     {
 	var header = new Header
         {
@@ -30,7 +30,7 @@ public class HeaderTest
     }
 
     [Fact]
-    public void DecodeTest1()
+    public void HeaderDecodeTest1()
     {
 	Byte[] headerByte = new Byte[12] { 0xAA, 0xAA, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 };
 	
