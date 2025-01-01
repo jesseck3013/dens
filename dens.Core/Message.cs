@@ -278,13 +278,26 @@ public class Message
 	return (label, firstCharIndex + length);
     }
 
-    public static string ParsePointer(Byte[] message, int Pointer)
+    public static string ParsePointer(Byte[] message, int pointer)
     {
-	var pointerValue = new Byte[2]{message[Pointer], message[Pointer + 1]};
-	var bitMask = (1 << 14) - 1;
-	var pointTo = BitConverter.ToUInt16(pointerValue) & bitMask;
+	Byte[] pointerValue;
+
+	if(BitConverter.IsLittleEndian)
+	{
+	    pointerValue = new Byte[2]{message[pointer + 1], message[pointer]}; 
+	}
+	else
+	{
+	    pointerValue = new Byte[2]{message[pointer], message[pointer + 1]};    
+	}
+
 	
-	var (name, pointer) = DecodeName(message, pointTo);
+	var bitMask = (1 << 14) - 1;
+
+	
+	var pointTo = BitConverter.ToUInt16(pointerValue) & bitMask;
+	Console.WriteLine(pointTo);
+	var (name, _) = DecodeName(message, pointTo);
 
 	return name;
     }
