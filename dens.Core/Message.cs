@@ -13,6 +13,18 @@ public static class Utils
 
 	return BitConverter.ToUInt16(data);
     }
+
+    public static byte[] GetBytes(ushort number)
+    {
+	var data = BitConverter.GetBytes(number);
+	    
+	if(BitConverter.IsLittleEndian)
+	{
+	    Array.Reverse(data);
+	}
+
+	return data;
+    }
 }
 
 public enum MessageType : ushort
@@ -78,14 +90,8 @@ public class Header
 	ushort[] headerUShort = new ushort[6];
 	for (var i = 0; i < header.Length - 2; i += 2)
 	{
-	    if(BitConverter.IsLittleEndian)
-	    {
-		headerUShort[i / 2] = BitConverter.ToUInt16(new Byte[2]{header[i + 1], header[i]}, 0);
-	    } else
-	    {
-		headerUShort[i / 2] = BitConverter.ToUInt16(new Byte[2]{header[i], header[i + 1]}, 0);		
-	    }
-
+	    headerUShort[i / 2] = Utils.ToUInt16(new Byte[2]{header[i + 1], header[i]});
+	    headerUShort[i / 2] = Utils.ToUInt16(new Byte[2]{header[i], header[i + 1]}); 
 	}
 	
 	ushort ID = headerUShort[0];
@@ -145,18 +151,10 @@ public class Header
 
 	for (int i = 0; i < data.Length; i++)
 	{
-	    byte[] bytes = BitConverter.GetBytes(data[i]);
+	    byte[] bytes = Utils.GetBytes(data[i]);
 	    
-	    if(BitConverter.IsLittleEndian)
-	    {
-		result[i * 2] = bytes[1];
-		result[i * 2 + 1] = bytes[0];
-	    }
-	    else
-	    {
-		result[i * 2] = bytes[0];
-		result[i * 2 + 1] = bytes[1];	
-	    }
+	    result[i * 2] = bytes[0];
+	    result[i * 2 + 1] = bytes[1];
 	}
 
 	return result;
@@ -257,6 +255,11 @@ public class RR
     public int TTL { get; set; }
     public ushort RDLENGTH { get; set; }
     public byte[] RDATA { get; set; }
+
+    // public static RR Decode()
+    // {
+	
+    // }
 }
 
 public class Message
@@ -303,23 +306,9 @@ public class Message
 
     public static string ParsePointer(Byte[] message, int pointer)
     {
-	Byte[] pointerValue;
-
-	if(BitConverter.IsLittleEndian)
-	{
-	    pointerValue = new Byte[2]{message[pointer + 1], message[pointer]}; 
-	}
-	else
-	{
-	    pointerValue = new Byte[2]{message[pointer], message[pointer + 1]};    
-	}
-
-	
+	ushort pointerValue = Utils.ToUInt16(new Byte[2]{message[pointer], message[pointer + 1]});
 	var bitMask = (1 << 14) - 1;
-
-	
-	var pointTo = BitConverter.ToUInt16(pointerValue) & bitMask;
-	Console.WriteLine(pointTo);
+	var pointTo = pointerValue & bitMask;
 	var (name, _) = DecodeName(message, pointTo);
 
 	return name;
@@ -436,4 +425,11 @@ public class Message
 
 	return result;
     }
+
+    // public Message Decode(byte[] message)
+    // {
+    // 	var headerBytes = new ArraySegment<byte>.Slice(message);
+    // 	var header = Header.Decode(headerBytes.Slice(0, 12).ToArray());
+
+    // }
 }
