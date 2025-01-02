@@ -111,7 +111,16 @@ public class HeaderTest
     [Fact]
     public void DecodeRRTest1()
     {
-	var (question, pointer) = Question.Decode(exampleResponse, 12);
-
+	var (rr, pointer) = RR.Decode(exampleResponse, 29);
+	Assert.Equal("example.com", rr.NAME);
+	Assert.Equal(RRType.A, rr.TYPE);
+	Assert.Equal(RecordClass.IN, rr.CLASS);
+	Assert.Equal((uint)1145, rr.TTL);
+	Assert.Equal(4, rr.RDLENGTH);
+	Assert.Equal(93, rr.RDATA[0]);
+	Assert.Equal(184, rr.RDATA[1]);
+	Assert.Equal(215, rr.RDATA[2]);
+	Assert.Equal(14, rr.RDATA[3]);
+	Assert.Equal(exampleResponse.Length, pointer);
     }
 }

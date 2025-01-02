@@ -26,6 +26,18 @@ public static class Utils
 	return BitConverter.ToUInt16(data);
     }
 
+    public static uint ToUInt32(byte octect1, byte octect2, byte octect3, byte octect4)
+    {
+	var data = new byte[4] { octect1, octect2, octect3, octect4 };
+
+	if(BitConverter.IsLittleEndian)
+	{
+	    Array.Reverse(data);
+	}
+
+	return BitConverter.ToUInt32(data);
+    }
+
     public static byte[] GetBytes(ushort number)
     {
 	var data = BitConverter.GetBytes(number);
@@ -263,17 +275,31 @@ public class RR
     public string NAME { get; set; }
     public RRType TYPE { get; set; }
     public RecordClass CLASS { get; set; }
-    public int TTL { get; set; }
+    public uint TTL { get; set; }
     public ushort RDLENGTH { get; set; }
     public byte[] RDATA { get; set; }
 
     // TODO: only support A record now, add support for other types later.
-    // public static (RR, int) Decode(byte[] message, int pointer)
-    // {
-    // 	var (name, nextPointer) = Message.DecodeName(message, pointer);
-    // 	//	Utils.ToUInt16()
-    // 	return (new RR(), 0);
-    // }
+    public static (RR, int) Decode(byte[] message, int pointer)
+    {
+	var (name, nextPointer) = Message.DecodeName(message, pointer);
+	var type = (RRType)Utils.ToUInt16(message[nextPointer], message[nextPointer + 1]);
+	var recordClass = (RecordClass)Utils.ToUInt16(message[nextPointer + 2], message[nextPointer + 3]);
+	var ttl = Utils.ToUInt32(message[nextPointer + 4], message[nextPointer + 5],
+					      message[nextPointer + 6], message[nextPointer + 7]);
+	var rdLength = Utils.ToUInt16(message[nextPointer + 8], message[nextPointer + 9]);
+	var data = new ArraySegment<byte>(message).Slice(nextPointer + 10, rdLength).ToArray();
+
+	var rr = new RR {
+	    NAME =  name,
+	    TYPE = type,
+	    CLASS = recordClass,
+	    TTL = ttl,
+	    RDLENGTH = rdLength,
+	    RDATA = data,
+	};
+	return (rr, nextPointer + 10 + rdLength);
+    }
 }
 
 public class Message
