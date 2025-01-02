@@ -117,10 +117,7 @@ public class HeaderTest
 	Assert.Equal(RecordClass.IN, rr.CLASS);
 	Assert.Equal((uint)1145, rr.TTL);
 	Assert.Equal(4, rr.RDLENGTH);
-	Assert.Equal(93, rr.RDATA[0]);
-	Assert.Equal(184, rr.RDATA[1]);
-	Assert.Equal(215, rr.RDATA[2]);
-	Assert.Equal(14, rr.RDATA[3]);
+	Assert.Equal("93.184.215.14", rr.RDATA);
 	Assert.Equal(exampleResponse.Length, pointer);
     }
 }

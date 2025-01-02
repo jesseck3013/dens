@@ -277,7 +277,7 @@ public class RR
     public RecordClass CLASS { get; set; }
     public uint TTL { get; set; }
     public ushort RDLENGTH { get; set; }
-    public byte[] RDATA { get; set; }
+    public string RDATA { get; set; }
 
     // TODO: only support A record now, add support for other types later.
     public static (RR, int) Decode(byte[] message, int pointer)
@@ -288,7 +288,13 @@ public class RR
 	var ttl = Utils.ToUInt32(message[nextPointer + 4], message[nextPointer + 5],
 					      message[nextPointer + 6], message[nextPointer + 7]);
 	var rdLength = Utils.ToUInt16(message[nextPointer + 8], message[nextPointer + 9]);
-	var data = new ArraySegment<byte>(message).Slice(nextPointer + 10, rdLength).ToArray();
+
+	var dataByte = new ArraySegment<byte>(message).Slice(nextPointer + 10, rdLength).ToArray();
+	var data = String.Empty;
+	if (type == RRType.A)
+	{
+	    data = $"{dataByte[0]}.{dataByte[1]}.{dataByte[2]}.{dataByte[3]}";
+	}
 
 	var rr = new RR {
 	    NAME =  name,
