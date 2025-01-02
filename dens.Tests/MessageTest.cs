@@ -96,4 +96,15 @@ public class HeaderTest
 	Assert.Equal("example.com", actual);
 	Assert.Equal(31, pointer);
     }
+
+    [Fact]
+    public void DecodeQuestionTest1()
+    {
+	var (question, pointer) = Question.Decode(exampleResponse, 12);
+
+	Assert.Equal("example.com", question.QNAME);
+	Assert.Equal(QType.A, question.QTYPE);
+	Assert.Equal(QClass.IN, question.QCLASS);
+	Assert.Equal(29, pointer);
+    }
 }

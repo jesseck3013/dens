@@ -2,6 +2,19 @@
 
 using System.Text;
 
+public static class Utils
+{
+    public static ushort ToUInt16(byte[] data)
+    {
+	if(BitConverter.IsLittleEndian)
+	{
+	    Array.Reverse(data);
+	}
+
+	return BitConverter.ToUInt16(data);
+    }
+}
+
 public enum MessageType : ushort
 {
     Query = 0,
@@ -223,6 +236,16 @@ public class Question
 	QNAME = name;
 	QTYPE = qtype;
 	QCLASS = qclass;
+    }
+
+    public static (Question, int) Decode(byte[] message, int pointer)
+    {
+	var (name, nextPointer) = Message.DecodeName(message, pointer);
+
+	ushort qtype = Utils.ToUInt16(new Byte[2]{message[nextPointer], message[nextPointer + 1]});
+	ushort qclass = Utils.ToUInt16(new Byte[2]{message[nextPointer + 2], message[nextPointer + 3]});
+
+	return (new Question(name, (QType)qtype, (QClass)qclass), nextPointer + 4);
     }
 }
 
