@@ -295,6 +295,11 @@ public class RR
 	{
 	    data = $"{dataByte[0]}.{dataByte[1]}.{dataByte[2]}.{dataByte[3]}";
 	}
+	if (type == RRType.PTR)
+	{
+	    var (PTRDNAME, _) = Message.DecodeName(message, nextPointer + 10);
+	    data = PTRDNAME;
+	}
 
 	var rr = new RR {
 	    NAME =  name,
