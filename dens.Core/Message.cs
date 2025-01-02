@@ -14,6 +14,18 @@ public static class Utils
 	return BitConverter.ToUInt16(data);
     }
 
+    public static ushort ToUInt16(byte octect1, byte octect2)
+    {
+	var data = new byte[2] { octect1, octect2 };
+
+	if(BitConverter.IsLittleEndian)
+	{
+	    Array.Reverse(data);
+	}
+
+	return BitConverter.ToUInt16(data);
+    }
+
     public static byte[] GetBytes(ushort number)
     {
 	var data = BitConverter.GetBytes(number);
@@ -90,8 +102,7 @@ public class Header
 	ushort[] headerUShort = new ushort[6];
 	for (var i = 0; i < header.Length - 2; i += 2)
 	{
-	    headerUShort[i / 2] = Utils.ToUInt16(new Byte[2]{header[i + 1], header[i]});
-	    headerUShort[i / 2] = Utils.ToUInt16(new Byte[2]{header[i], header[i + 1]}); 
+	    headerUShort[i / 2] = Utils.ToUInt16(header[i], header[i + 1]);
 	}
 	
 	ushort ID = headerUShort[0];
@@ -240,8 +251,8 @@ public class Question
     {
 	var (name, nextPointer) = Message.DecodeName(message, pointer);
 
-	ushort qtype = Utils.ToUInt16(new Byte[2]{message[nextPointer], message[nextPointer + 1]});
-	ushort qclass = Utils.ToUInt16(new Byte[2]{message[nextPointer + 2], message[nextPointer + 3]});
+	ushort qtype = Utils.ToUInt16(message[nextPointer], message[nextPointer + 1]);
+	ushort qclass = Utils.ToUInt16(message[nextPointer + 2], message[nextPointer + 3]);
 
 	return (new Question(name, (QType)qtype, (QClass)qclass), nextPointer + 4);
     }
@@ -256,9 +267,12 @@ public class RR
     public ushort RDLENGTH { get; set; }
     public byte[] RDATA { get; set; }
 
-    // public static RR Decode()
+    // TODO: only support A record now, add support for other types later.
+    // public static (RR, int) Decode(byte[] message, int pointer)
     // {
-	
+    // 	var (name, nextPointer) = Message.DecodeName(message, pointer);
+    // 	//	Utils.ToUInt16()
+    // 	return (new RR(), 0);
     // }
 }
 
@@ -306,7 +320,7 @@ public class Message
 
     public static string ParsePointer(Byte[] message, int pointer)
     {
-	ushort pointerValue = Utils.ToUInt16(new Byte[2]{message[pointer], message[pointer + 1]});
+	ushort pointerValue = Utils.ToUInt16(message[pointer], message[pointer + 1]);
 	var bitMask = (1 << 14) - 1;
 	var pointTo = pointerValue & bitMask;
 	var (name, _) = DecodeName(message, pointTo);
