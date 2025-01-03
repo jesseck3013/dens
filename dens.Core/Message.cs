@@ -343,6 +343,15 @@ public class Message
 	questions = [new Question(name)];
     }
 
+    public Message(Header header, Question[] questions, RR[] answers, RR[]authoritys, RR[] additionals)
+    {
+	this.header = header;
+	this.questions = questions;
+	this.answers = answers;
+	this.authoritys = authoritys;
+	this.additionals = additionals;
+    }
+
     public static bool IsPointer(byte data)
     {
 
@@ -478,10 +487,51 @@ public class Message
 	return result;
     }
 
-    // public Message Decode(byte[] message)
-    // {
-    // 	var headerBytes = new ArraySegment<byte>.Slice(message);
-    // 	var header = Header.Decode(headerBytes.Slice(0, 12).ToArray());
+    public static Message Decode(byte[] message)
+    {
+	var headerBytes = new ArraySegment<byte>(message);
+	var header = Header.Decode(headerBytes.Slice(0, 12).ToArray());
 
-    // }
+	Question[] questions = [];
+	RR[] answers = [];
+	RR[] authoritys = [];
+	RR[] additionals = [];
+
+
+	int pointer = 12;
+
+	while (pointer < message.Length)
+	{
+	    for (int i = 0; i < header.QDCOUNT; i++) {
+		var (item, nextPointer) = Question.Decode(message, pointer);
+		pointer = nextPointer;
+		questions = questions.Concat([item]).ToArray();
+	    }
+
+	    for (int i = 0; i < header.ANCOUNT; i++) {
+		var (item, nextPointer) = RR.Decode(message, pointer);
+		pointer = nextPointer;
+		answers = answers.Concat([item]).ToArray();
+	    }
+
+	    for (int i = 0; i < header.NSCOUNT; i++) {
+		var (item, nextPointer) = RR.Decode(message, pointer);
+		pointer = nextPointer;
+		authoritys = authoritys.Concat([item]).ToArray();
+	    }
+
+	    for (int i = 0; i < header.ARCOUNT; i++) {
+		var (item, nextPointer) = RR.Decode(message, pointer);
+		pointer = nextPointer;
+		additionals = additionals.Concat([item]).ToArray();
+	    }
+	}
+	return new Message (
+	    header,
+	    questions,
+	    answers,
+	    authoritys,
+	    additionals
+	);
+    }
 }

@@ -136,16 +136,44 @@ public class HeaderTest
 	Assert.Equal(PTRResponse.Length, pointer);
     }
 
-    // [Fact]
-    // public void DecodeResponseTest1()
-    // {
-    // 	var (rr, pointer) = RR.Decode(exampleResponse, 38);
-    // 	Assert.Equal("1.1.1.1.in-addr.arpa", rr.NAME);
-    // 	Assert.Equal(RRType.PTR, rr.TYPE);
-    // 	Assert.Equal(RecordClass.IN, rr.CLASS);
-    // 	Assert.Equal((uint)447, rr.TTL);
-    // 	Assert.Equal(17, rr.RDLENGTH);
-    // 	Assert.Equal("one.one.one.one", rr.RDATA);
-    // 	Assert.Equal(PTRResponse.Length, pointer);
-    // }
+    [Fact]
+    public void DecodeMessageTest1()
+    {
+	var message = Message.Decode(PTRResponse);
+
+	// Header
+	Assert.Equal(1, message.header.ID);
+	Assert.Equal(MessageType.Response, message.header.QR);
+	Assert.Equal(QueryType.Query, message.header.OPCODE);
+	Assert.False(message.header.AA);
+	Assert.False(message.header.TC);
+	Assert.True(message.header.RD);
+	Assert.True(message.header.RA);
+	Assert.Equal(ResponseType.Ok, message.header.RCODE);
+	Assert.Equal(1, message.header.QDCOUNT);
+	Assert.Equal(1, message.header.ANCOUNT);
+	Assert.Equal(0, message.header.NSCOUNT);
+	Assert.Equal(0, message.header.ARCOUNT);
+
+	// Questions
+	Assert.Single(message.questions);
+	Assert.Equal("1.1.1.1.in-addr.arpa", message.questions[0].QNAME);
+	Assert.Equal(QType.PTR, message.questions[0].QTYPE);
+	Assert.Equal(QClass.IN, message.questions[0].QCLASS);
+
+	// Answers
+	Assert.Single(message.answers);
+	Assert.Equal("1.1.1.1.in-addr.arpa", message.answers[0].NAME);
+	Assert.Equal(RRType.PTR, message.answers[0].TYPE);
+	Assert.Equal(RecordClass.IN, message.answers[0].CLASS);
+	Assert.Equal((uint)447, message.answers[0].TTL);
+	Assert.Equal(17, message.answers[0].RDLENGTH);
+	Assert.Equal("one.one.one.one", message.answers[0].RDATA);
+
+	// Authoritys
+	Assert.Empty(message.authoritys);
+
+	// Additionals
+	Assert.Empty(message.additionals);
+    }
 }
