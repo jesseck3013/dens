@@ -114,7 +114,7 @@ public class HeaderTest
 	var (rr, pointer) = RR.Decode(exampleResponse, 29);
 	Assert.Equal("example.com", rr.NAME);
 	Assert.Equal(RRType.A, rr.TYPE);
-	Assert.Equal(RecordClass.IN, rr.CLASS);
+	Assert.Equal(RRClass.IN, rr.CLASS);
 	Assert.Equal((uint)1145, rr.TTL);
 	Assert.Equal(4, rr.RDLENGTH);
 	Assert.Equal("93.184.215.14", rr.RDATA);
@@ -129,7 +129,7 @@ public class HeaderTest
 	var (rr, pointer) = RR.Decode(PTRResponse, 38);
 	Assert.Equal("1.1.1.1.in-addr.arpa", rr.NAME);
 	Assert.Equal(RRType.PTR, rr.TYPE);
-	Assert.Equal(RecordClass.IN, rr.CLASS);
+	Assert.Equal(RRClass.IN, rr.CLASS);
 	Assert.Equal((uint)447, rr.TTL);
 	Assert.Equal(17, rr.RDLENGTH);
 	Assert.Equal("one.one.one.one", rr.RDATA);
@@ -165,7 +165,7 @@ public class HeaderTest
 	Assert.Single(message.answers);
 	Assert.Equal("1.1.1.1.in-addr.arpa", message.answers[0].NAME);
 	Assert.Equal(RRType.PTR, message.answers[0].TYPE);
-	Assert.Equal(RecordClass.IN, message.answers[0].CLASS);
+	Assert.Equal(RRClass.IN, message.answers[0].CLASS);
 	Assert.Equal((uint)447, message.answers[0].TTL);
 	Assert.Equal(17, message.answers[0].RDLENGTH);
 	Assert.Equal("one.one.one.one", message.answers[0].RDATA);
@@ -206,7 +206,7 @@ public class HeaderTest
 	Assert.Single(message.answers);
 	Assert.Equal("example.com", message.answers[0].NAME);
 	Assert.Equal(RRType.A, message.answers[0].TYPE);
-	Assert.Equal(RecordClass.IN, message.answers[0].CLASS);
+	Assert.Equal(RRClass.IN, message.answers[0].CLASS);
 	Assert.Equal((uint)1145, message.answers[0].TTL);
 	Assert.Equal(4, message.answers[0].RDLENGTH);
 	Assert.Equal("93.184.215.14", message.answers[0].RDATA);

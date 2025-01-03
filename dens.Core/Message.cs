@@ -229,7 +229,7 @@ public enum QType : ushort
     ANY = 255,
 }
 
-public enum RecordClass : ushort
+public enum RRClass : ushort
 {
     IN = 1,
     CS = 2,
@@ -239,10 +239,10 @@ public enum RecordClass : ushort
 
 public enum QClass : ushort
 {
-    IN = RecordClass.IN,
-    CS = RecordClass.CS,
-    CH = RecordClass.CH,
-    HS = RecordClass.HS,
+    IN = RRClass.IN,
+    CS = RRClass.CS,
+    CH = RRClass.CH,
+    HS = RRClass.HS,
     ANY = 255
 }
 
@@ -284,7 +284,7 @@ public class RR
 {
     public string NAME { get; set; }
     public RRType TYPE { get; set; }
-    public RecordClass CLASS { get; set; }
+    public RRClass CLASS { get; set; }
     public uint TTL { get; set; }
     public ushort RDLENGTH { get; set; }
     public string RDATA { get; set; }
@@ -294,7 +294,7 @@ public class RR
     {
 	var (name, nextPointer) = Message.DecodeName(message, pointer);
 	var type = (RRType)Utils.ToUInt16(message[nextPointer], message[nextPointer + 1]);
-	var recordClass = (RecordClass)Utils.ToUInt16(message[nextPointer + 2], message[nextPointer + 3]);
+	var recordClass = (RRClass)Utils.ToUInt16(message[nextPointer + 2], message[nextPointer + 3]);
 	var ttl = Utils.ToUInt32(message[nextPointer + 4], message[nextPointer + 5],
 					      message[nextPointer + 6], message[nextPointer + 7]);
 	var rdLength = Utils.ToUInt16(message[nextPointer + 8], message[nextPointer + 9]);
