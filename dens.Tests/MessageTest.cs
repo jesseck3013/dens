@@ -176,4 +176,45 @@ public class HeaderTest
 	// Additionals
 	Assert.Empty(message.additionals);
     }
+
+    [Fact]
+    public void DecodeMessageTest2()
+    {
+	var message = Message.Decode(exampleResponse);
+
+	// Header
+	Assert.Equal(2, message.header.ID);
+	Assert.Equal(MessageType.Response, message.header.QR);
+	Assert.Equal(QueryType.Query, message.header.OPCODE);
+	Assert.False(message.header.AA);
+	Assert.False(message.header.TC);
+	Assert.True(message.header.RD);
+	Assert.True(message.header.RA);
+	Assert.Equal(ResponseType.Ok, message.header.RCODE);
+	Assert.Equal(1, message.header.QDCOUNT);
+	Assert.Equal(1, message.header.ANCOUNT);
+	Assert.Equal(0, message.header.NSCOUNT);
+	Assert.Equal(0, message.header.ARCOUNT);
+
+	// Questions
+	Assert.Single(message.questions);
+	Assert.Equal("example.com", message.questions[0].QNAME);
+	Assert.Equal(QType.A, message.questions[0].QTYPE);
+	Assert.Equal(QClass.IN, message.questions[0].QCLASS);
+
+	// Answers
+	Assert.Single(message.answers);
+	Assert.Equal("example.com", message.answers[0].NAME);
+	Assert.Equal(RRType.A, message.answers[0].TYPE);
+	Assert.Equal(RecordClass.IN, message.answers[0].CLASS);
+	Assert.Equal((uint)1145, message.answers[0].TTL);
+	Assert.Equal(4, message.answers[0].RDLENGTH);
+	Assert.Equal("93.184.215.14", message.answers[0].RDATA);
+
+	// Authoritys
+	Assert.Empty(message.authoritys);
+
+	// Additionals
+	Assert.Empty(message.additionals);
+    }
 }
