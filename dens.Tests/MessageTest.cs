@@ -135,4 +135,17 @@ public class HeaderTest
 	Assert.Equal("one.one.one.one", rr.RDATA);
 	Assert.Equal(PTRResponse.Length, pointer);
     }
+
+    // [Fact]
+    // public void DecodeResponseTest1()
+    // {
+    // 	var (rr, pointer) = RR.Decode(exampleResponse, 38);
+    // 	Assert.Equal("1.1.1.1.in-addr.arpa", rr.NAME);
+    // 	Assert.Equal(RRType.PTR, rr.TYPE);
+    // 	Assert.Equal(RecordClass.IN, rr.CLASS);
+    // 	Assert.Equal((uint)447, rr.TTL);
+    // 	Assert.Equal(17, rr.RDLENGTH);
+    // 	Assert.Equal("one.one.one.one", rr.RDATA);
+    // 	Assert.Equal(PTRResponse.Length, pointer);
+    // }
 }

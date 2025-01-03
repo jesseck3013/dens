@@ -268,6 +268,16 @@ public class Question
 
 	return (new Question(name, (QType)qtype, (QClass)qclass), nextPointer + 4);
     }
+
+    public byte[] Encode()
+    {
+	Byte[] nameByte = Message.EncodeName(QNAME);
+	Byte[] qType = BitConverter.GetBytes((ushort)QTYPE);
+	Byte[] qClass = BitConverter.GetBytes((ushort)QCLASS);
+	
+	return nameByte.Concat(qType).Concat(qClass).ToArray();
+    }
+	
 }
 
 public class RR
@@ -316,10 +326,10 @@ public class RR
 public class Message
 {
     public Header header { get; set; }
-    public Question question { get; set; }
-    public RR[] Answer { get; set; } = [];
-    public RR[] Authority { get; set; } = [];
-    public RR[] Additional { get; set; } = [];
+    public Question[] questions { get; set; }
+    public RR[] answers { get; set; } = [];
+    public RR[] authoritys { get; set; } = [];
+    public RR[] additionals { get; set; } = [];
 
     // create a query message
     public Message(string name, MessageType messageType =  MessageType.Query)
@@ -330,7 +340,7 @@ public class Message
 	}
 
 	header = Header.NewQuery();
-	question = new Question(name);
+	questions = [new Question(name)];
     }
 
     public static bool IsPointer(byte data)
@@ -455,24 +465,15 @@ public class Message
 
     public Byte[] Encode() {
 	Byte[] headerByte = header.Encode();
-	Byte[] nameByte = EncodeName(question.QNAME);
-	Byte[] qType = BitConverter.GetBytes((ushort)question.QTYPE);
-	Byte[] qClass = BitConverter.GetBytes((ushort)question.QCLASS);
+	Byte[] questionByte = [];
 
-	int length = headerByte.Length + nameByte.Length + qType.Length + qClass.Length;
-        byte[] result = new byte[length];
 
-        int offset = 0;
-        Array.Copy(headerByte, 0, result, offset, headerByte.Length);
-        offset += headerByte.Length;
+	foreach(var question in questions)
+	{
+	    questionByte = questionByte.Concat(question.Encode()).ToArray();
+	}
 
-        Array.Copy(nameByte, 0, result, offset, nameByte.Length);
-        offset += nameByte.Length;
-
-        Array.Copy(qType, 0, result, offset, qType.Length);
-        offset += qType.Length;
-
-        Array.Copy(qClass, 0, result, offset, qClass.Length);
+	Byte[] result = headerByte.Concat(questionByte).ToArray();
 
 	return result;
     }
