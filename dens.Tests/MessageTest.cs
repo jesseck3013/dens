@@ -5,6 +5,16 @@ using dens.Core;
 public class HeaderTest
 {
     [Fact]
+    public void MessageEncodeTest1()
+    {
+	var message = new Message("google.com");
+	var messageBytes = message.Encode();
+
+	var messageDecoded = Message.Decode(messageBytes);
+	Assert.Equal(QType.A, messageDecoded.questions[0].QTYPE);
+    }
+
+    [Fact]
     public void HeaderEncodeTest1()
     {
 	var header = new Header

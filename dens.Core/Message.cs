@@ -272,8 +272,8 @@ public class Question
     public byte[] Encode()
     {
         Byte[] nameByte = Message.EncodeName(QNAME);
-        Byte[] qType = BitConverter.GetBytes((ushort)QTYPE);
-        Byte[] qClass = BitConverter.GetBytes((ushort)QCLASS);
+        Byte[] qType = Utils.GetBytes((ushort)QTYPE);
+        Byte[] qClass = Utils.GetBytes((ushort)QCLASS);
 
         return nameByte.Concat(qType).Concat(qClass).ToArray();
     }
@@ -318,7 +318,7 @@ public class RR
         {
             data = $"{dataByte[0]}.{dataByte[1]}.{dataByte[2]}.{dataByte[3]}";
         }
-        if (type == RRType.PTR)
+        if (type == RRType.PTR || type == RRType.CNAME)
         {
             var (PTRDNAME, _) = Message.DecodeName(message, nextPointer + 10);
             data = PTRDNAME;
