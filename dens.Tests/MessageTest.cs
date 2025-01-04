@@ -1,0 +1,230 @@
+﻿namespace dens.Tests;
+
+using dens.Core;
+
+public class HeaderTest
+{
+    [Fact]
+    public void MessageEncodeTest1()
+    {
+	var message = new Message("google.com");
+	var messageBytes = message.Encode();
+
+	var messageDecoded = Message.Decode(messageBytes);
+	Assert.Equal(QType.A, messageDecoded.questions[0].QTYPE);
+    }
+
+    [Fact]
+    public void HeaderEncodeTest1()
+    {
+	var header = new Header
+        {
+            ID = 0xAAAA,
+            QR = MessageType.Query,
+            OPCODE = QueryType.Query,
+            AA = false,
+            TC = false,
+            RD = true,
+            RA = false,
+            RCODE = ResponseType.IsQuery,
+            QDCOUNT = 0x01,
+            ANCOUNT = 0x00,
+            NSCOUNT = 0x00,
+            ARCOUNT = 0x00
+        };
+
+        var byteArray = header.Encode();
+
+	Byte[] expectedArray = new Byte[12] { 0xAA, 0xAA, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	Assert.Equal(expectedArray, byteArray);
+    }
+
+    [Fact]
+    public void HeaderDecodeTest1()
+    {
+	Byte[] headerByte = new Byte[12] { 0xAA, 0xAA, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 };
+	
+	var actual = Header.Decode(headerByte);
+
+	Assert.Equal(0xAAAA, actual.ID);
+	Assert.Equal(MessageType.Response, actual.QR);
+	Assert.Equal(QueryType.Query, actual.OPCODE);
+	Assert.False(actual.AA);
+	Assert.False(actual.TC);
+	Assert.True(actual.RD);
+	Assert.True(actual.RA);
+	Assert.Equal(1, actual.QDCOUNT);
+	Assert.Equal(1, actual.ANCOUNT);
+	Assert.Equal(0, actual.NSCOUNT);
+	Assert.Equal(0, actual.ARCOUNT);
+    }
+
+    [Fact]
+    public void PointerTest1()
+    {
+	Assert.True(Message.IsPointer(0b_1100_0000));
+	Assert.False(Message.IsPointer(0b_0000_0000));
+    }
+
+    public string domain = "F.ISI.ARPA";
+    public byte[] domainByte = new Byte[] {0x01, 0x46, 0x03, 0x49, 0x53, 0x49, 0x04, 0x41, 0x52, 0x50, 0x41, 0x00};
+
+    [Fact]
+    public void ParseLabelTest1()
+    {
+	var (actual, pointer) = Message.ParseLabel(domainByte, 0);
+
+	Assert.Equal("F", actual);
+	Assert.Equal(2, pointer);
+    }
+
+    [Fact]
+    public void ParseLabelTest2()
+    {
+	var (actual, pointer) = Message.ParseLabel(domainByte, 2);
+
+	Assert.Equal("ISI", actual);
+	Assert.Equal(6, pointer);
+    }
+
+    [Fact]
+    public void DecodeNameTest1()
+    {
+	var (actual, pointer) = Message.DecodeName(domainByte, 0);
+
+	Assert.Equal(domain, actual);
+	Assert.Equal(domainByte.Length, pointer);
+    }
+
+    public byte[] exampleResponse = { 0x00, 0x02, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01, 0xc0, 0x0c, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x04, 0x79, 0x00, 0x04, 0x5d, 0xb8, 0xd7, 0x0e };
+
+    [Fact]
+    public void DecodeNameTest2()
+    {
+	var (actual, pointer) = Message.DecodeName(exampleResponse, 29);
+
+	Assert.Equal("example.com", actual);
+	Assert.Equal(31, pointer);
+    }
+
+    [Fact]
+    public void DecodeQuestionTest1()
+    {
+	var (question, pointer) = Question.Decode(exampleResponse, 12);
+
+	Assert.Equal("example.com", question.QNAME);
+	Assert.Equal(QType.A, question.QTYPE);
+	Assert.Equal(QClass.IN, question.QCLASS);
+	Assert.Equal(29, pointer);
+    }
+
+    [Fact]
+    public void DecodeRRTest1()
+    {
+	var (rr, pointer) = RR.Decode(exampleResponse, 29);
+	Assert.Equal("example.com", rr.NAME);
+	Assert.Equal(RRType.A, rr.TYPE);
+	Assert.Equal(RRClass.IN, rr.CLASS);
+	Assert.Equal((uint)1145, rr.TTL);
+	Assert.Equal(4, rr.RDLENGTH);
+	Assert.Equal("93.184.215.14", rr.RDATA);
+	Assert.Equal(exampleResponse.Length, pointer);
+    }
+
+    public byte[] PTRResponse = {0x0, 0x1, 0x81, 0x80, 0x0, 0x1, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x31, 0x1, 0x31, 0x1, 0x31, 0x1, 0x31, 0x7, 0x69, 0x6e, 0x2d, 0x61, 0x64, 0x64, 0x72, 0x4, 0x61, 0x72, 0x70, 0x61, 0x0, 0x0, 0xc, 0x0, 0x1, 0xc0, 0xc, 0x0, 0xc, 0x0, 0x1, 0x0, 0x0, 0x1, 0xbf, 0x0, 0x11, 0x3, 0x6f, 0x6e, 0x65, 0x3, 0x6f, 0x6e, 0x65, 0x3, 0x6f, 0x6e, 0x65, 0x3, 0x6f, 0x6e, 0x65, 0x0};
+
+    [Fact]
+    public void DecodeRRTest2()
+    {
+	var (rr, pointer) = RR.Decode(PTRResponse, 38);
+	Assert.Equal("1.1.1.1.in-addr.arpa", rr.NAME);
+	Assert.Equal(RRType.PTR, rr.TYPE);
+	Assert.Equal(RRClass.IN, rr.CLASS);
+	Assert.Equal((uint)447, rr.TTL);
+	Assert.Equal(17, rr.RDLENGTH);
+	Assert.Equal("one.one.one.one", rr.RDATA);
+	Assert.Equal(PTRResponse.Length, pointer);
+    }
+
+    [Fact]
+    public void DecodeMessageTest1()
+    {
+	var message = Message.Decode(PTRResponse);
+
+	// Header
+	Assert.Equal(1, message.header.ID);
+	Assert.Equal(MessageType.Response, message.header.QR);
+	Assert.Equal(QueryType.Query, message.header.OPCODE);
+	Assert.False(message.header.AA);
+	Assert.False(message.header.TC);
+	Assert.True(message.header.RD);
+	Assert.True(message.header.RA);
+	Assert.Equal(ResponseType.Ok, message.header.RCODE);
+	Assert.Equal(1, message.header.QDCOUNT);
+	Assert.Equal(1, message.header.ANCOUNT);
+	Assert.Equal(0, message.header.NSCOUNT);
+	Assert.Equal(0, message.header.ARCOUNT);
+
+	// Questions
+	Assert.Single(message.questions);
+	Assert.Equal("1.1.1.1.in-addr.arpa", message.questions[0].QNAME);
+	Assert.Equal(QType.PTR, message.questions[0].QTYPE);
+	Assert.Equal(QClass.IN, message.questions[0].QCLASS);
+
+	// Answers
+	Assert.Single(message.answers);
+	Assert.Equal("1.1.1.1.in-addr.arpa", message.answers[0].NAME);
+	Assert.Equal(RRType.PTR, message.answers[0].TYPE);
+	Assert.Equal(RRClass.IN, message.answers[0].CLASS);
+	Assert.Equal((uint)447, message.answers[0].TTL);
+	Assert.Equal(17, message.answers[0].RDLENGTH);
+	Assert.Equal("one.one.one.one", message.answers[0].RDATA);
+
+	// Authoritys
+	Assert.Empty(message.authoritys);
+
+	// Additionals
+	Assert.Empty(message.additionals);
+    }
+
+    [Fact]
+    public void DecodeMessageTest2()
+    {
+	var message = Message.Decode(exampleResponse);
+
+	// Header
+	Assert.Equal(2, message.header.ID);
+	Assert.Equal(MessageType.Response, message.header.QR);
+	Assert.Equal(QueryType.Query, message.header.OPCODE);
+	Assert.False(message.header.AA);
+	Assert.False(message.header.TC);
+	Assert.True(message.header.RD);
+	Assert.True(message.header.RA);
+	Assert.Equal(ResponseType.Ok, message.header.RCODE);
+	Assert.Equal(1, message.header.QDCOUNT);
+	Assert.Equal(1, message.header.ANCOUNT);
+	Assert.Equal(0, message.header.NSCOUNT);
+	Assert.Equal(0, message.header.ARCOUNT);
+
+	// Questions
+	Assert.Single(message.questions);
+	Assert.Equal("example.com", message.questions[0].QNAME);
+	Assert.Equal(QType.A, message.questions[0].QTYPE);
+	Assert.Equal(QClass.IN, message.questions[0].QCLASS);
+
+	// Answers
+	Assert.Single(message.answers);
+	Assert.Equal("example.com", message.answers[0].NAME);
+	Assert.Equal(RRType.A, message.answers[0].TYPE);
+	Assert.Equal(RRClass.IN, message.answers[0].CLASS);
+	Assert.Equal((uint)1145, message.answers[0].TTL);
+	Assert.Equal(4, message.answers[0].RDLENGTH);
+	Assert.Equal("93.184.215.14", message.answers[0].RDATA);
+
+	// Authoritys
+	Assert.Empty(message.authoritys);
+
+	// Additionals
+	Assert.Empty(message.additionals);
+    }
+}

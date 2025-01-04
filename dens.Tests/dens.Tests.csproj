@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dens.ConsoleApp\dens.ConsoleApp.csproj" />
+    <ProjectReference Include="..\dens.Core\dens.Core.csproj" />
   </ItemGroup>
 
 </Project>
