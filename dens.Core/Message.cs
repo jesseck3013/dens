@@ -243,6 +243,11 @@ public class RR
     public ushort RDLENGTH { get; set; }
     public string RDATA { get; set; } = String.Empty;
 
+    public override string ToString()
+    {
+	return $"{TYPE}    {CLASS}    {RDATA}\n";
+    }
+
     public static bool IsName(RRType type)
     {
 	switch (type)
@@ -305,8 +310,8 @@ public class RR
         }
         if (IsName(type))
         {
-            var (PTRDNAME, _) = Message.DecodeName(message, nextPointer + 10);
-            data = PTRDNAME;
+            var (nameData, _) = Message.DecodeName(message, nextPointer + 10);
+            data = nameData;
         }
 
         var rr = new RR
@@ -331,7 +336,7 @@ public class Message
     public RR[] additionals { get; set; } = [];
 
     // create a query message
-    public Message(string name, MessageType messageType = MessageType.Query)
+    public Message(string name, MessageType messageType = MessageType.Query, QType qtype = QType.A)
     {
         if (messageType == MessageType.Response)
         {
@@ -339,7 +344,7 @@ public class Message
         }
 
         header = Header.NewQuery();
-        questions = [new Question(name)];
+        questions = [new Question(name, qtype)];
     }
 
     public Message(Header header, Question[] questions, RR[] answers, RR[] authoritys, RR[] additionals)
@@ -537,5 +542,36 @@ public class Message
             authoritys.ToArray(),
             additionals.ToArray()
         );
+    }
+
+    public override string ToString()
+    {
+	string result = "";
+
+	result += "++++ Answer ++++\n";
+	foreach (var rr in answers)
+	{
+	    result += rr.ToString();
+	}
+
+	if (authoritys.Length > 0)
+	{
+	    result += "++++ Authority ++++\n";	    
+	}
+	foreach (var rr in authoritys)
+	{
+	    result += rr.ToString();
+	}
+
+	if (authoritys.Length > 0)
+	{
+	    result += "++++ Additional ++++\n";
+	}
+	foreach (var rr in additionals)
+	{
+	    result += rr.ToString();
+	}
+
+	return result;
     }
 }
