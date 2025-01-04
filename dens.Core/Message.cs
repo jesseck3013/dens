@@ -1,6 +1,7 @@
 ﻿namespace dens.Core;
 
 using System.Text;
+using System.Net;
 
 public enum MessageType : ushort
 {
@@ -152,7 +153,8 @@ public enum RRType : ushort
     HINFO = 13,
     MINFO = 14,
     MX = 15,
-    TXT = 16    
+    TXT = 16,   
+    AAAA = 28,
 }
 
 // QType is a super set of RRType
@@ -174,6 +176,7 @@ public enum QType : ushort
     MINFO = RRType.MINFO,
     MX = RRType.MX,
     TXT = RRType.TXT,
+    AAAA = RRType.AAAA,
     AXFR = 252,
     MAILB = 253,
     MAILA = 254,
@@ -233,12 +236,42 @@ public class Question
 
 public class RR
 {
-    public string NAME { get; set; }
+    public string NAME { get; set; } = String.Empty;
     public RRType TYPE { get; set; }
     public RRClass CLASS { get; set; }
     public uint TTL { get; set; }
     public ushort RDLENGTH { get; set; }
-    public string RDATA { get; set; }
+    public string RDATA { get; set; } = String.Empty;
+
+    public static bool IsName(RRType type)
+    {
+	switch (type)
+	{
+	    case RRType.CNAME:
+		return true;
+	    case RRType.NS:
+		return true;
+	    case RRType.PTR:
+		return true;
+	    case RRType.TXT:
+		return true;
+	    default:
+		return false;
+	}
+    }
+
+    public static bool IsIp(RRType type)
+    {
+	switch (type)
+	{
+	    case RRType.A:
+		return true;
+	    case RRType.AAAA:
+		return true;
+	    default:
+		return false;
+	}
+    }
 
     // TODO: only support A record now, add support for other types later.
     public static (RR, int) Decode(byte[] message, int pointer)
@@ -265,11 +298,12 @@ public class RR
 
         var dataByte = new ArraySegment<byte>(message).Slice(nextPointer + 10, rdLength).ToArray();
         var data = String.Empty;
-        if (type == RRType.A)
+        if (IsIp(type))
         {
-            data = $"{dataByte[0]}.{dataByte[1]}.{dataByte[2]}.{dataByte[3]}";
+            var ip = new IPAddress(dataByte);
+	    data = ip.ToString();
         }
-        if (type == RRType.PTR || type == RRType.CNAME)
+        if (IsName(type))
         {
             var (PTRDNAME, _) = Message.DecodeName(message, nextPointer + 10);
             data = PTRDNAME;
