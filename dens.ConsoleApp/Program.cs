@@ -5,11 +5,11 @@ using dens.Core;
 
 class Program
 {
-    static async Task Main()
+    static async Task Main(string[] args)
     {
 	UdpClient udpClient = new UdpClient();
 	
-	var message = new Message("portal.azure.com");
+	var message = new Message(args[0]);
 
 	var messageBytes = message.Encode();
 
