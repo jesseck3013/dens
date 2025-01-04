@@ -106,7 +106,7 @@ public class Header
 
         data[0] = ID;
         ushort flags = 0;
-        flags |= (ushort)((ushort)(QR) << 15);
+	flags |= (ushort)((ushort)(QR) << 15);
         flags |= (ushort)((ushort)(OPCODE) << 11);
         flags |= (ushort)((ushort)(AA ? 1 : 0) << 10);
         flags |= (ushort)((ushort)(TC ? 1 : 0) << 9);
@@ -152,7 +152,7 @@ public enum RRType : ushort
     HINFO = 13,
     MINFO = 14,
     MX = 15,
-    TXT = 16
+    TXT = 16    
 }
 
 // QType is a super set of RRType
@@ -459,11 +459,10 @@ public class Message
         var headerBytes = new ArraySegment<byte>(message);
         var header = Header.Decode(headerBytes.Slice(0, 12).ToArray());
 
-        Question[] questions = [];
-        RR[] answers = [];
-        RR[] authoritys = [];
-        RR[] additionals = [];
-
+        var questions = new List<Question>();
+        var answers = new List<RR>();
+        var authoritys = new List<RR>();
+        var additionals = new List<RR>();
 
         int pointer = 12;
 
@@ -473,36 +472,36 @@ public class Message
             {
                 var (item, nextPointer) = Question.Decode(message, pointer);
                 pointer = nextPointer;
-                questions = questions.Concat([item]).ToArray();
+                questions.Add(item);
             }
 
             for (int i = 0; i < header.ANCOUNT; i++)
             {
                 var (item, nextPointer) = RR.Decode(message, pointer);
                 pointer = nextPointer;
-                answers = answers.Concat([item]).ToArray();
+		answers.Add(item);
             }
 
             for (int i = 0; i < header.NSCOUNT; i++)
             {
                 var (item, nextPointer) = RR.Decode(message, pointer);
                 pointer = nextPointer;
-                authoritys = authoritys.Concat([item]).ToArray();
+                authoritys.Add(item);
             }
 
             for (int i = 0; i < header.ARCOUNT; i++)
             {
                 var (item, nextPointer) = RR.Decode(message, pointer);
                 pointer = nextPointer;
-                additionals = additionals.Concat([item]).ToArray();
+                additionals.Add(item);
             }
         }
         return new Message(
             header,
-            questions,
-            answers,
-            authoritys,
-            additionals
+            questions.ToArray(),
+            answers.ToArray(),
+            authoritys.ToArray(),
+            additionals.ToArray()
         );
     }
 }
