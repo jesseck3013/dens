@@ -336,7 +336,7 @@ public class Message
     public RR[] additionals { get; set; } = [];
 
     // create a query message
-    public Message(string name, MessageType messageType = MessageType.Query, QType qtype = QType.A)
+    public Message(string name, QType qtype = QType.A, MessageType messageType = MessageType.Query)
     {
         if (messageType == MessageType.Response)
         {
