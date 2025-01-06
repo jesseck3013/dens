@@ -8,9 +8,10 @@ class Program
     static async Task Main(string[] args)
     {
 	UdpClient udpClient = new UdpClient();
-	
-	var message = new Message(args[0]);
 
+	QType QTYPE = (QType)Enum.Parse(typeof(RRType), args[1]);
+
+	var message = new Message(args[0], QTYPE);
 	var messageBytes = message.Encode();
 
 	var endpoint = IPEndPoint.Parse($"{args[2]}:53");
