@@ -26,7 +26,7 @@ public class HeaderTest
             TC = false,
             RD = true,
             RA = false,
-            RCODE = ResponseType.IsQuery,
+            RCODE = ResponseType.Ok,
             QDCOUNT = 0x01,
             ANCOUNT = 0x00,
             NSCOUNT = 0x00,
